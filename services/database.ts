@@ -3,8 +3,7 @@ import { User } from '../types';
 
 // In production, this would come from an environment variable (e.g. process.env.REACT_APP_API_URL)
 // For now, we point to the local server port.
-const API_URL = 'http://localhost:5000/api';
-
+const API_URL = '/api';
 /**
  * The API Service Layer.
  * Connects to the Node.js backend server.
