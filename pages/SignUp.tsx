@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -10,7 +9,12 @@ const SignUp: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'STUDENT' | 'LANDLORD'>('STUDENT');
-  const { signup, isLoading, error, clearError, user } = useAuth();
+  
+  // FIXED: Removed the typo here
+  const [formError, setFormError] = useState<string | null>(null);
+  
+  const { isLoading: authLoading, user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // If already logged in, redirect
@@ -19,26 +23,21 @@ const SignUp: React.FC = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-      if (error) clearError();
+      if (formError) setFormError(null);
   }, [name, email, password]);
-
-// Inside pages/SignUp.tsx
 
   const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      // ... validation ...
+      setLoading(true);
+      setFormError(null);
+
       try {
-        // NOTE: You might need to adjust your signup context function to NOT set the user immediately
-        // OR just call the API directly here to avoid auto-login issues in context
-        
-        // Let's assume we modified the signup function to just return success without setting 'user'
         await AuthService.signUp(name, email, password, role); 
-        
-        // Navigate to Verify Page, passing the email
         navigate('/verify-email', { state: { email } });
-        
       } catch (e: any) {
-        // Handle error
+        setFormError(e.message || "An error occurred during sign up");
+      } finally {
+        setLoading(false);
       }
   };
 
@@ -46,17 +45,17 @@ const SignUp: React.FC = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-             <Link to="/" className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center hover:bg-indigo-700 transition">
-                <Building className="w-7 h-7 text-white" />
-            </Link>
+          <div className="h-12 w-12 bg-indigo-600 rounded-xl flex items-center justify-center">
+            <Building className="h-8 w-8 text-white" />
+          </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Join UniNest
+          Create your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Already have an account?{' '}
+          Or{' '}
           <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-            Sign in
+            sign in to your existing account
           </Link>
         </p>
       </div>
@@ -64,10 +63,11 @@ const SignUp: React.FC = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-xl sm:rounded-xl sm:px-10 border border-gray-100">
           
-          {error && (
+          {/* Error Message Display */}
+          {formError && (
             <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 flex items-start">
-              <AlertCircle className="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-600 font-medium">{error}</p>
+              <AlertCircle className="w-5 h-4 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-600 font-medium">{formError}</p>
             </div>
           )}
 
@@ -84,8 +84,7 @@ const SignUp: React.FC = () => {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
-                  placeholder="John Doe"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
             </div>
@@ -103,29 +102,38 @@ const SignUp: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
-                  placeholder="student@university.edu"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                I want to...
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                I am a
               </label>
-              <div className="grid grid-cols-2 gap-4">
-                  <div 
-                    onClick={() => setRole('STUDENT')}
-                    className={`cursor-pointer border rounded-lg p-3 text-center transition-all bg-white ${role === 'STUDENT' ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-medium ring-1 ring-indigo-600' : 'border-gray-200 hover:border-gray-300'}`}
-                  >
-                      Find a Room
-                  </div>
-                  <div 
-                    onClick={() => setRole('LANDLORD')}
-                    className={`cursor-pointer border rounded-lg p-3 text-center transition-all bg-white ${role === 'LANDLORD' ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-medium ring-1 ring-indigo-600' : 'border-gray-200 hover:border-gray-300'}`}
-                  >
-                      List a Place
-                  </div>
+              <div className="mt-1 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setRole('STUDENT')}
+                  className={`flex justify-center py-2 px-4 border rounded-md shadow-sm text-sm font-medium ${
+                    role === 'STUDENT'
+                      ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50 text-indigo-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Student
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('LANDLORD')}
+                  className={`flex justify-center py-2 px-4 border rounded-md shadow-sm text-sm font-medium ${
+                    role === 'LANDLORD'
+                      ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50 text-indigo-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Landlord
+                </button>
               </div>
             </div>
 
@@ -138,13 +146,11 @@ const SignUp: React.FC = () => {
                   id="password"
                   name="password"
                   type="password"
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900"
-                  placeholder="At least 6 characters"
-                  minLength={6}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
             </div>
@@ -152,17 +158,13 @@ const SignUp: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={loading}
                 className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
               >
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Create Account <ArrowRight className="ml-2 w-4 h-4" /></>}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Create Account <ArrowRight className="ml-2 w-4 h-4" /></>}
               </button>
             </div>
           </form>
-          
-          <div className="mt-6 text-center text-xs text-gray-500">
-             By signing up, you agree to our Terms of Service and Privacy Policy.
-          </div>
         </div>
       </div>
     </div>
