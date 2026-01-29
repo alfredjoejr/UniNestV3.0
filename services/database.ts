@@ -41,6 +41,21 @@ export const AuthService = {
     localStorage.setItem('token', data.token);
     return data.user;
   },
+  
+  // Inside AuthService object...
+  async verifyOTP(email: string, otp: string): Promise<User> {
+      const response = await fetch(`${API_URL}/auth/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const data = await AuthService._handleResponse(response);
+      
+      // Store the JWT token now that they are verified
+      localStorage.setItem('token', data.token);
+      return data.user;
+  },
 
   /**
    * Log In an existing user

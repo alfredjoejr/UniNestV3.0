@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Building, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { AuthService } from '../services/database';
 
 const SignUp: React.FC = () => {
   const [name, setName] = useState('');
@@ -21,19 +22,24 @@ const SignUp: React.FC = () => {
       if (error) clearError();
   }, [name, email, password]);
 
+// Inside pages/SignUp.tsx
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password.length < 6) {
-        // We can do client side validation here too
-        alert("Password must be at least 6 characters");
-        return;
-    }
-    try {
-      await signup(name, email, password, role);
-      navigate('/dashboard');
-    } catch (e) {
-      // Error is displayed via context
-    }
+      e.preventDefault();
+      // ... validation ...
+      try {
+        // NOTE: You might need to adjust your signup context function to NOT set the user immediately
+        // OR just call the API directly here to avoid auto-login issues in context
+        
+        // Let's assume we modified the signup function to just return success without setting 'user'
+        await AuthService.signUp(name, email, password, role); 
+        
+        // Navigate to Verify Page, passing the email
+        navigate('/verify-email', { state: { email } });
+        
+      } catch (e: any) {
+        // Handle error
+      }
   };
 
   return (

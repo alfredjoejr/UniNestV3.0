@@ -8,6 +8,7 @@ import ListingDetail from './pages/ListingDetail';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
+import VerifyEmail from './pages/VerifyEmail'; // Import the new page
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -25,6 +26,10 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            
+            {/* The new route must go here, inside <Routes> */}
+            <Route path="/verify-email" element={<VerifyEmail />} />
+
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
