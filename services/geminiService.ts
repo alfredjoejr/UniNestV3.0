@@ -1,91 +1,74 @@
-import { GoogleGenAI, Type } from "@google/genai";
+
 import { AISearchResult, ListingType } from "../types";
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+/**
+ * SIMULATED AI SERVICE
+ * 
+ * Since the Gemini API Key requirement has been removed, this service 
+ * now uses local logic to simulate the AI features.
+ */
 
 /**
- * Parses a natural language user query into structured search filters.
+ * Parses a natural language user query into structured search filters using basic string matching.
  */
 export const parseSmartSearch = async (userQuery: string): Promise<AISearchResult> => {
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Extract search filters from this student housing query: "${userQuery}".
-      If the user implies looking for a roommate (e.g., "looking for a room in a shared house", "find listing with people"), set listingType to ROOMMATE_WANTED.
-      If the user implies a vacant empty place (e.g. "studio", "apartment for rent"), set listingType to VACANT_ROOM.
-      If the user asks for new buildings or projects, set listingType to COMING_SOON.
-      If unspecified, leave listingType null.`,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            keywords: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-              description: "Key terms to match against title/description (e.g. 'quiet', 'modern', 'engineering')",
-            },
-            maxPrice: {
-              type: Type.NUMBER,
-              description: "The maximum budget mentioned, or null if none.",
-            },
-            listingType: {
-              type: Type.STRING,
-              enum: [ListingType.VACANT_ROOM, ListingType.ROOMMATE_WANTED, ListingType.COMING_SOON],
-              description: "The type of listing inferred.",
-            },
-            location: {
-              type: Type.STRING,
-              description: "Specific location or proximity mentioned.",
-            },
-          },
-          required: ["keywords"],
-        },
-      },
-    });
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 800));
 
-    if (response.text) {
-        return JSON.parse(response.text) as AISearchResult;
-    }
-    throw new Error("Empty response from AI");
-  } catch (error) {
-    console.error("Smart Search Error:", error);
-    // Fallback
-    return { keywords: [userQuery] };
+  const lowerQuery = userQuery.toLowerCase();
+  const keywords = userQuery.split(' ').filter(word => word.length > 3);
+  
+  let listingType: ListingType | undefined = undefined;
+  let maxPrice: number | undefined = undefined;
+
+  // 1. Detect Listing Type
+  if (lowerQuery.includes('roommate') || lowerQuery.includes('share') || lowerQuery.includes('people')) {
+    listingType = ListingType.ROOMMATE_WANTED;
+  } else if (lowerQuery.includes('apartment') || lowerQuery.includes('studio') || lowerQuery.includes('private') || lowerQuery.includes('vacant')) {
+    listingType = ListingType.VACANT_ROOM;
+  } else if (lowerQuery.includes('new') || lowerQuery.includes('project') || lowerQuery.includes('building')) {
+    listingType = ListingType.COMING_SOON;
   }
+
+  // 2. Detect Price (looks for numbers like "500" or "$500")
+  const priceMatch = lowerQuery.match(/\$?(\d{3,4})/);
+  if (priceMatch) {
+    maxPrice = parseInt(priceMatch[1]);
+  }
+
+  // 3. Detect Location (Mock logic)
+  let location: string | undefined = undefined;
+  if (lowerQuery.includes('campus') || lowerQuery.includes('north') || lowerQuery.includes('downtown')) {
+    location = "Near Campus";
+  }
+
+  return {
+    keywords,
+    maxPrice,
+    listingType,
+    location
+  };
 };
 
 /**
- * Checks compatibility between a user bio and a listing description/owner bio.
+ * Checks compatibility between a user bio and a listing description/owner bio using a randomizer.
  */
 export const checkCompatibility = async (userBio: string, listingBio: string): Promise<{ score: number; reason: string }> => {
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: `Analyze compatibility between a student looking for a room and a current listing owner.
-            User Bio: "${userBio}"
-            Listing/Owner Bio: "${listingBio}"
-            
-            Rate from 0 to 100 and give a short 1-sentence reason.`,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        score: { type: Type.NUMBER },
-                        reason: { type: Type.STRING }
-                    }
-                }
-            }
-        });
-        
-        if (response.text) {
-            return JSON.parse(response.text);
-        }
-        return { score: 50, reason: "Could not analyze compatibility." };
-    } catch (e) {
-        console.error(e);
-        return { score: 0, reason: "Error processing request." };
-    }
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Generate a random score between 65 and 98 to make it feel positive
+    const score = Math.floor(Math.random() * (98 - 65 + 1)) + 65;
+    
+    const positiveReasons = [
+        "Your study schedules seem to align perfectly based on the description.",
+        "Both of you value a quiet environment, which is a great match.",
+        "You share similar interests in social activities.",
+        "Your cleanliness standards appear to match the owner's expectations.",
+        "Great vibe match! You both seem to be night owls."
+    ];
+
+    const reason = positiveReasons[Math.floor(Math.random() * positiveReasons.length)];
+
+    return { score, reason };
 }
