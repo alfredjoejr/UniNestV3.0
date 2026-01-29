@@ -10,7 +10,14 @@
   },
   "dependencies": {
     "@google/genai": "latest",
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "0.460.0",
+    "mysql2": "^3.16.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^6.30.3"

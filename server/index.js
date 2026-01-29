@@ -16,19 +16,19 @@
  * Run with:
  * node server/index.js
  */
+import 'dotenv/config'; 
 
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const mysql = require('mysql2/promise');
-const crypto = require('crypto');
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import mysql from 'mysql2/promise';
+import crypto from 'crypto';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const SECRET_KEY = process.env.JWT_SECRET || 'dev-secret-key-change-in-prod';
-
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
@@ -36,8 +36,8 @@ app.use(bodyParser.json());
 // MySQL Connection Pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'password', // Default, change as needed
+  user: process.env.DB_USER || 'user',
+  password: process.env.DB_PASSWORD || 'Test@9050', // Default, change as needed
   database: process.env.DB_NAME || 'uninest_db',
   waitForConnections: true,
   connectionLimit: 10,
