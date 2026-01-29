@@ -1,7 +1,7 @@
 
 import { AISearchResult, ListingType } from "../types";
 
-/**
+/**k
  * SIMULATED AI SERVICE
  * 
  * Since the Gemini API Key requirement has been removed, this service 
